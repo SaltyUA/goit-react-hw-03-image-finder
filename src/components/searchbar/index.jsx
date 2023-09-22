@@ -11,11 +11,17 @@ class Searchbar extends Component {
     }));
   };
 
+  handleSubmit = e => {
+    e.preventDefault();
+    const { search } = this.state;
+    this.props.onSubmit(search);
+    this.setState(() => ({ search: '' }));
+  };
   render() {
     const { search } = this.state;
 
     return (
-      <form>
+      <form onSubmit={this.handleSubmit}>
         <input
           onChange={this.handleChange}
           type="text"
