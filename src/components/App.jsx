@@ -24,6 +24,7 @@ export class App extends Component {
     return (
       <div>
         <Searchbar onSubmit={this.searchImages} />
+        <ImageGallery gallery={this.state.gallery} />
       </div>
     );
   }
