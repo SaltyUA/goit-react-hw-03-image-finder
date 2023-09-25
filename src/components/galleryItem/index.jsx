@@ -1,10 +1,10 @@
-const GalleryItem = ({ largeImageUrl, webformatURL }) => {
+import { GalleryImage, GalleryItemStyled } from './GalleryImage.styled';
+
+const GalleryItem = ({ largeImageURL, webformatURL, showModal, alt }) => {
   return (
-    <li>
-      <a href={largeImageUrl}>
-        <img src={webformatURL} alt="" />
-      </a>
-    </li>
+    <GalleryItemStyled onClick={() => showModal(largeImageURL, alt)}>
+      <GalleryImage src={webformatURL} alt={alt} />
+    </GalleryItemStyled>
   );
 };
 

@@ -1,19 +1,22 @@
-import GalleryItem from 'components/galleryItem';
+import GalleryItem from 'components/GalleryItem';
 import React from 'react';
+import { ImageGalleryGrid } from './ImageGallery.styled';
 
-const ImageGallery = ({ gallery }) => {
+const ImageGallery = ({ gallery, showModal }) => {
   return (
-    <ul>
-      {gallery.map(({ id, largeImageUrl, webformatURL }) => {
+    <ImageGalleryGrid>
+      {gallery.map(({ id, largeImageURL, webformatURL, tags }) => {
         return (
           <GalleryItem
             key={id}
-            largeImageUrl={largeImageUrl}
+            largeImageURL={largeImageURL}
             webformatURL={webformatURL}
+            showModal={showModal}
+            alt={tags}
           />
         );
       })}
-    </ul>
+    </ImageGalleryGrid>
   );
 };
 
