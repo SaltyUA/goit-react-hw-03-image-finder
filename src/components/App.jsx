@@ -5,6 +5,7 @@ import ImageGallery from './ImageGallery';
 import AppStyled from './App.styled';
 import Loader from './Loader';
 import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Modal from './Modal';
 import LoadMoreButton from './LoadMoreButton';
 
