@@ -3,24 +3,74 @@ import Searchbar from './Searchbar';
 import { getImagesBySearch } from 'api/pixabayAPI';
 import ImageGallery from './ImageGallery';
 import AppStyled from './App.styled';
-import LoadMoreButton from './LoadMoreButton';
 import Loader from './Loader';
+import { ToastContainer, toast } from 'react-toastify';
 import Modal from './Modal';
+import LoadMoreButton from './LoadMoreButton';
 
 export class App extends Component {
   state = {
     gallery: [],
-    totalPages: null,
     currentPage: 1,
     searchQuery: '',
     isLoading: false,
     isShowBtn: false,
-    isShowModal: false,
-    error: null,
-    alt: '',
-    largeURL: '',
+    modalImage: '',
   };
+  componentDidUpdate(_, prevState) {
+    const { searchQuery, currentPage } = this.state;
+    if (
+      searchQuery !== prevState.searchQuery ||
+      currentPage !== prevState.currentPage
+    ) {
+      this.setState({ isLoading: true });
 
+      getImagesBySearch(searchQuery, currentPage)
+        .then(response => {
+          if (response.status !== 200) {
+            throw new Error(response.statusText);
+          }
+          return response.data;
+        })
+        .then(data => {
+          if (data.totalHits === 0) {
+            toast.warning(
+              `Sorry, can't find any images by this query. Try another one`
+            );
+            return;
+          }
+          const totalPages = Math.ceil(data.totalHits / 12);
+
+          if (totalPages > currentPage) this.setState({ isShowBtn: true });
+          else {
+            toast.info(`These are all images for this query`);
+            this.setState({ isShowBtn: false });
+          }
+
+          const newImages = data.hits.map(
+            ({ id, webformatURL, largeImageURL, tags }) => ({
+              id,
+              webformatURL,
+              largeImageURL,
+              tags,
+            })
+          );
+
+          this.setState(prevState => ({
+            gallery: [...prevState.gallery, ...newImages],
+          }));
+        })
+        .catch(error => {
+          console.log(error);
+          return toast.error(`Something wrong. Try later.`);
+        })
+        .finally(() => {
+          this.setState({
+            isLoading: false,
+          });
+        });
+    }
+  }
   searchImages = request => {
     const { searchQuery, currentPage } = this.state;
 
@@ -28,7 +78,6 @@ export class App extends Component {
       this.setState(() => ({
         error: `It allready showing results for this query`,
       }));
-      return;
     }
 
     this.setState(() => ({
@@ -59,64 +108,42 @@ export class App extends Component {
       .finally(() => this.setState(() => ({ isLoading: false })));
   };
 
+  onSubmitSearch = value => {
+    if (value === this.state.searchQuery) {
+      toast.info(`It's allready results for this query. Try another one`);
+      return;
+    }
+    this.setState({
+      searchQuery: value,
+      currentPage: 1,
+      gallery: [],
+      isShowBtn: false,
+    });
+  };
+
   handleLoadMore = () => {
-    this.setState(() => ({
-      isLoading: true,
-    }));
-    const { currentPage, searchQuery } = this.state;
-    const nextPage = currentPage + 1;
-    getImagesBySearch(searchQuery, nextPage)
-      .then(response => {
-        this.setState(
-          prev => ({
-            gallery: [...prev.gallery, ...response.hits],
-            currentPage: nextPage,
-            isLoading: false,
-            isShowBtn: nextPage < prev.totalPages ? true : false,
-          }),
-          () => {
-            window.scrollBy({
-              top: 584,
-              behavior: 'smooth',
-            });
-          }
-        );
-      })
-      .catch(error =>
-        this.setState(() => ({
-          error: error.data.message,
-        }))
-      );
-  };
-
-  showModal = (largeImageURL, alt) => {
-    this.setState(() => ({
-      largeURL: largeImageURL,
-      alt: alt,
-      isShowModal: true,
-    }));
-  };
-
-  toggleModal = () => {
     this.setState(prev => ({
-      isShowModal: !prev.isShowModal,
+      currentPage: prev.currentPage + 1,
     }));
+  };
+
+  toggleModal = (modalImage = null) => {
+    this.setState({ modalImage });
   };
 
   render() {
-    const { gallery, error, isLoading, isShowModal, isShowBtn, largeURL, alt } =
-      this.state;
-    const { searchImages, toggleModal, showModal, handleLoadMore } = this;
+    const { gallery, isLoading, isShowBtn, modalImage } = this.state;
+    const { onSubmitSearch, toggleModal, handleLoadMore } = this;
     return (
       <AppStyled>
-        <Searchbar onSubmit={searchImages} />
+        <Searchbar onSubmit={onSubmitSearch} />
         {isLoading && <Loader />}
-        {/* {error && <Error error={error} />} */}
-        {isShowModal && (
-          <Modal imgURL={largeURL} toggleModal={toggleModal} alt={alt} />
+        <ImageGallery gallery={gallery} onClickImage={toggleModal} />
+        {gallery.length !== 0 && isShowBtn && (
+          <LoadMoreButton handleLoadMore={handleLoadMore} />
         )}
-        <ImageGallery gallery={gallery} showModal={showModal} />
-        {isShowBtn && <LoadMoreButton loadMore={handleLoadMore} />}
+        {modalImage && <Modal modalImage={modalImage} onClose={toggleModal} />}
+        <ToastContainer autoClose={4000} />
       </AppStyled>
     );
   }

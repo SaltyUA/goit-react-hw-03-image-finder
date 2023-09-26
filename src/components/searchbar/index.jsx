@@ -5,6 +5,7 @@ import {
   SearchInput,
   SearchbarContainer,
 } from './Searchbar.styled';
+import { toast } from 'react-toastify';
 
 class Searchbar extends Component {
   state = {
@@ -19,10 +20,20 @@ class Searchbar extends Component {
 
   handleSubmit = e => {
     e.preventDefault();
+    if (this.state.search.trim() === '') {
+      toast.info('Please type your search query');
+      return;
+    }
     const { search } = this.state;
     this.props.onSubmit(search);
-    this.setState(() => ({ search: '' }));
+    this.reset();
   };
+
+  reset = () =>
+    this.setState({
+      value: '',
+    });
+
   render() {
     const { search } = this.state;
 
@@ -35,7 +46,6 @@ class Searchbar extends Component {
             autoComplete="off"
             autoFocus
             placeholder="Search images and photos"
-            required
             value={search}
           />
           <SearchButton type="submit">

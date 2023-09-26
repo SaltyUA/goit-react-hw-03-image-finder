@@ -2,7 +2,7 @@ import GalleryItem from 'components/GalleryItem';
 import React from 'react';
 import { ImageGalleryGrid } from './ImageGallery.styled';
 
-const ImageGallery = ({ gallery, showModal }) => {
+const ImageGallery = ({ gallery, onClickImage }) => {
   return (
     <ImageGalleryGrid>
       {gallery.map(({ id, largeImageURL, webformatURL, tags }) => {
@@ -11,7 +11,7 @@ const ImageGallery = ({ gallery, showModal }) => {
             key={id}
             largeImageURL={largeImageURL}
             webformatURL={webformatURL}
-            showModal={showModal}
+            onClickImage={onClickImage}
             alt={tags}
           />
         );

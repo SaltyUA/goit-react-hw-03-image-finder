@@ -10,21 +10,27 @@ class Modal extends Component {
     document.removeEventListener('keydown', this.handlePressEsc);
   }
 
-  handlePressEsc = () => {
-    this.props.toggleModal();
+  handlePressEsc = e => {
+    if (e.code === 'Escape') {
+      this.props.onClose();
+    }
   };
 
-  onClick = e => {
-    e.stopPropagation();
+  handleBackdropClick = e => {
+    if (e.currentTarget === e.target) {
+      this.props.onClose();
+    }
   };
 
   render() {
-    const { imgURL, alt, toggleModal } = this.props;
+    const {
+      modalImage: { src, alt },
+    } = this.props;
 
     return (
-      <Overlay className="overlay" onClick={toggleModal}>
-        <Popup onClick={this.onClick}>
-          <img src={imgURL} alt={alt} onClick={this.onClick} />
+      <Overlay className="overlay" onClick={this.handleBackdropClick}>
+        <Popup>
+          <img src={src} alt={alt} />
         </Popup>
       </Overlay>
     );
