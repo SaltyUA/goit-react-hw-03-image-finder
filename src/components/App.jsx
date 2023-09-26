@@ -67,12 +67,20 @@ export class App extends Component {
     const nextPage = currentPage + 1;
     getImagesBySearch(searchQuery, nextPage)
       .then(response => {
-        this.setState(prev => ({
-          gallery: [...prev.gallery, ...response.hits],
-          currentPage: nextPage,
-          isLoading: false,
-          isShowBtn: nextPage < prev.totalPages ? true : false,
-        }));
+        this.setState(
+          prev => ({
+            gallery: [...prev.gallery, ...response.hits],
+            currentPage: nextPage,
+            isLoading: false,
+            isShowBtn: nextPage < prev.totalPages ? true : false,
+          }),
+          () => {
+            window.scrollBy({
+              top: 584,
+              behavior: 'smooth',
+            });
+          }
+        );
       })
       .catch(error =>
         this.setState(() => ({
